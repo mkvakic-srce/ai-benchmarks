@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#PBS -q gpu
+#PBS -l select=4:ngpus=1:ncpus=4
+#PBS -l place=scatter
+#PBS -e output/
+#PBS -o output/
+#PBS -M marko.kvakic@srce.hr
+#PBS -m bae
+
+cd ${PBS_O_WORKDIR:-""}
+export PATH=${PWD}:$PATH
+export BATCH_SIZE=256
+export EPOCHS=1
+torchrun-launcher.pbs torchrun-run.py
