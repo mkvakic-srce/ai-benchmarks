@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# environment
+module load mpi/openmpi41-x86_64
+
+# address & port
+export MASTER_NODE=$(hostname)
+export MASTER_ADDR=$(ip addr show dev ib0 | egrep -o 'inet [0-9.]+' | egrep -o '[0-9.]+')
+RANDOM=$(egrep -o '^[0-9]+' <<< $JOB_ID)
+export MASTER_PORT=$((1024+RANDOM*190/100))
+
+# nodes
+nodes=$(awk '{print $1}' $PE_HOSTFILE | sort -u)
+
+# exit if no file given
+if [[ $# -eq 0 ]]; then
+  echo "[$(date +%d-%m-%Y' '%H:%M:%S)] pytorch-launcher.pbs: no arguments given"
+  exit 1
+else
+  # otherwise launch
+  mpirun \
+    -x PATH \
+    -x PE_HOSTFILE \
+    -x MASTER_ADDR \
+    -x MASTER_PORT \
+    -x EPOCHS \
+    -x BATCH_SIZE \
+    --np $(wc -w <<< $nodes) \
+    --host $(tr ' ' ',' <<< $nodes) \
+    pytorch-exec.sge $@
+fi

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# CUDA_VISIBLE_DEVICES
+echo $PE_HOSTFILE
+export CUDA_VISIBLE_DEVICES=$(grep $(hostname) $PE_HOSTFILE|grep -o 'gpu.[0-3]'|grep -o '[0-3]'|tr '\n' ',')
+
+# run
+singularity exec \
+  --nv \
+  --pwd /host_pwd \
+  --bind ${PWD}:/host_pwd \
+  pytorch_21.07-py3.sif \
+    python -m torch.distributed.run \
+      --nproc_per_node=auto \
+      --nnodes=${OMPI_COMM_WORLD_SIZE} \
+      --node_rank=${OMPI_COMM_WORLD_RANK} \
+      --rdzv_endpoint="${MASTER_ADDR}:${MASTER_PORT}" \
+      $@

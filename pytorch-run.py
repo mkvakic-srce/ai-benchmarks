@@ -24,7 +24,7 @@ def main():
     # vars
     epochs = int(os.environ['EPOCHS'])
     batch_size = int(os.environ['BATCH_SIZE'])
-    samples = 256*1000
+    samples = 256
     epochs = 3
 
     # init
@@ -33,7 +33,7 @@ def main():
     global_rank = int(os.environ['RANK'])
 
     # model
-    model = resnet50(weights=None)
+    model = resnet50()
     model = model.to(rank)
     model = DDP(model, device_ids=[rank])
     optimizer = optim.SGD(model.parameters(), lr=0.001)
