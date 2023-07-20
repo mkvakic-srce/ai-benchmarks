@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # CUDA_VISIBLE_DEVICES
-echo $PE_HOSTFILE
 export CUDA_VISIBLE_DEVICES=$(grep $(hostname) $PE_HOSTFILE|grep -o 'gpu.[0-3]'|grep -o '[0-3]'|tr '\n' ',')
 
 # run

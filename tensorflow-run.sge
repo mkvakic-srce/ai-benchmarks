@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#$ -cwd
+#$ -pe gpu 5
+#$ -l cores=4
+#$ -e output/
+#$ -o output/
+#$ -M marko.kvakic@srce.hr
+#$ -m bae
+
+export PE_HOSTFILE=${PE_HOSTFILE:-"/storage/home/mkvakic/ai-benchmarks/pe_hostfile"}
+export JOB_ID=${JOB_ID:-1337}
+
+cd ${PBS_O_WORKDIR:-""}
+export PATH=${PWD}:$PATH
+export BATCH_SIZE=256
+export EPOCHS=5
+tensorflow-launcher.sge tensorflow-run.py

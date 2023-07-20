@@ -1,0 +1,2 @@
+Bootstrap:docker
+From:nvcr.io/nvidia/tensorflow:23.06-tf2-py3

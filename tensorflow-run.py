@@ -26,9 +26,10 @@ class CustomCallback(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         elapsed = time.time()-self.start
         img_sec = self.samples/elapsed
-        nranks =  int(os.environ['PMI_SIZE'])
         ngpus = len(self.gpus)
-        if os.environ['PMI_RANK'] == '0':
+        nranks = os.environ['PMI_SIZE'] if 'PMI_SIZE' in os.environ else os.environ['OMPI_COMM_WORLD_SIZE']
+        rank = os.environ['PMI_RANK'] if 'PMI_RANK' in os.environ else os.environ['OMPI_COMM_WORLD_RANK']
+        if rank == '0':
             lines = [
                 'batch_size %s' % self.batch_size,
                 'samples %s' % self.samples,
@@ -43,7 +44,6 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
 def main():
 
-
     gpus = tf.config.experimental.list_physical_devices('GPU')
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
@@ -51,7 +51,7 @@ def main():
     strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
 
     batch_size = int(os.environ['BATCH_SIZE'])
-    samples = batch_size*100
+    samples = batch_size*10
     epochs = int(os.environ['EPOCHS'])
 
     data = tf.random.uniform([samples, 224, 224, 3])
