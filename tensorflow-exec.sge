@@ -1,15 +1,10 @@
 #!/bin/bash
 
-# TF_CONFIG
-export TF_CONFIG="{\"cluster\": {\"worker\":[${WORKER:0:-2}]}, \"task\": {\"type\": \"worker\", \"index\": ${OMPI_COMM_WORLD_RANK}}}"
-
-# CUDA_VISIBLE_DEVICES
-export CUDA_VISIBLE_DEVICES=$(grep $(hostname) $PE_HOSTFILE|grep -o 'gpu.[0-3]'|grep -o '[0-3]'|tr '\n' ',')
-
 # run
-singularity exec \
-  --nv \
-  --pwd /host_pwd \
-  --bind ${PWD}:/host_pwd \
-  tensorflow_21.07-tf2-py3.sif \
+cuda-wrapper.sh \
+  singularity exec \
+    --nv \
+    --pwd /host_pwd \
+    --bind ${PWD}:/host_pwd \
+    tensorflow_21.07-tf2-py3.sif \
     python $@

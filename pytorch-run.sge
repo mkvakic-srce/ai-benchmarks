@@ -1,17 +1,19 @@
 #!/bin/bash
 
 #$ -cwd
-#$ -pe gpu 5
+#$ -pe gpu 1
 #$ -l cores=4
 #$ -e output/
 #$ -o output/
 #$ -M marko.kvakic@srce.hr
 #$ -m bae
 
+module load mpi/openmpi41-x86_64
+
 export PE_HOSTFILE=${PE_HOSTFILE:-"/storage/home/mkvakic/ai-benchmarks/pe_hostfile"}
 export JOB_ID=${JOB_ID:-1337}
 
 export PATH=${PWD}:$PATH
-export BATCH_SIZE=256
+export BATCH_SIZE=128
 export EPOCHS=10
 pytorch-launcher.sge pytorch-run.py

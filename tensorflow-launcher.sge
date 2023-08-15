@@ -1,19 +1,7 @@
 #!/bin/bash
 
-# environment
-module load mpi/openmpi41-x86_64
-
-# address & port
-export MASTER_NODE=$(hostname)
-export MASTER_ADDR=$(ip addr show dev ib0 | egrep -o 'inet [0-9.]+' | egrep -o '[0-9.]+')
-RANDOM=$(egrep -o '^[0-9]+' <<< $JOB_ID)
-export MASTER_PORT=$((1024+RANDOM*190/100))
-
-# nodes
-nodes=$(awk '{print $1}' $PE_HOSTFILE | sort -u)
-
-# worker
-export WORKER=$( printf "\"%s:${MASTER_PORT}\", " $nodes )
+# NCCL
+export NCCL_DEBUG=INFO
 
 # exit if no file given
 if [[ $# -eq 0 ]]; then
@@ -22,14 +10,10 @@ if [[ $# -eq 0 ]]; then
 else
   # otherwise launch
   mpirun \
-    -x PATH \
-    -x PE_HOSTFILE \
-    -x MASTER_ADDR \
-    -x MASTER_PORT \
-    -x EPOCHS \
-    -x BATCH_SIZE \
-    -x WORKER \
-    --np $(wc -w <<< $nodes) \
-    --host $(tr ' ' ',' <<< $nodes) \
+    -x NCCL_DEBUG \
+    -map-by slot \
+    -bind-to none \
+    -mca pml ob1 \
+    -mca btl ^openib \
     tensorflow-exec.sge $@
 fi

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # CUDA_VISIBLE_DEVICES
-export CUDA_VISIBLE_DEVICES=$(grep $(hostname) $PE_HOSTFILE|grep -o 'gpu.[0-3]'|grep -o '[0-3]'|tr '\n' ',')
+export CUDA_VISIBLE_DEVICES=$(cat $TMPDIR/gpu)
 
 # run
 singularity exec \

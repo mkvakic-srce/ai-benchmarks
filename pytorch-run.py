@@ -24,8 +24,7 @@ def main():
     # vars
     epochs = int(os.environ['EPOCHS'])
     batch_size = int(os.environ['BATCH_SIZE'])
-    samples = 256
-    epochs = 3
+    samples = batch_size*10
 
     # init
     dist.init_process_group("nccl")
@@ -58,7 +57,6 @@ def main():
             images = images.to(rank)
             labels = labels.to(rank)
             outputs = model(images)
-            classes = torch.argmax(outputs, dim=1)
             loss = loss_fn(outputs, labels)
             optimizer.zero_grad()
             loss.backward()
@@ -70,7 +68,8 @@ def main():
                                                                    loss.item()))
         if (global_rank == 0):
             elapsed = time.time()-start
-            img_sec = samples/elapsed
+            world_size = int(os.environ['WORLD_SIZE'])
+            img_sec = samples/elapsed*world_size
             lines = [
                 'batch_size %s' % batch_size,
                 'samples %s' % samples,
@@ -78,7 +77,7 @@ def main():
                 'elapsed %0.2f' % elapsed,
                 'imgsec %0.2f' % img_sec,
                 'local_world_size %s' % os.environ['LOCAL_WORLD_SIZE'],
-                'world_size %s' % os.environ['WORLD_SIZE'],
+                'world_size %s' % world_size,
             ]
             print(','.join(lines))
 

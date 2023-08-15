@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# environment
-module load mpi/openmpi41-x86_64
-
 # address & port
 export MASTER_NODE=$(hostname)
 export MASTER_ADDR=$(ip addr show dev ib0 | egrep -o 'inet [0-9.]+' | egrep -o '[0-9.]+')
@@ -10,7 +7,10 @@ RANDOM=$(egrep -o '^[0-9]+' <<< $JOB_ID)
 export MASTER_PORT=$((1024+RANDOM*190/100))
 
 # nodes
-nodes=$(awk '{print $1}' $PE_HOSTFILE | sort -u)
+nodes=$(awk '{print $1}' $PE_HOSTFILE | sed 's/.isabella//g' | sort -u)
+
+# NCCL
+export NCCL_INFO=DEBUG
 
 # exit if no file given
 if [[ $# -eq 0 ]]; then
@@ -23,9 +23,10 @@ else
     -x PE_HOSTFILE \
     -x MASTER_ADDR \
     -x MASTER_PORT \
+    -x NCCL_INFO \
     -x EPOCHS \
     -x BATCH_SIZE \
-    --np $(wc -w <<< $nodes) \
     --host $(tr ' ' ',' <<< $nodes) \
+    --pernode \
     pytorch-exec.sge $@
 fi
